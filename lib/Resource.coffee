@@ -1,6 +1,8 @@
 _ = require 'underscore'
 async = require 'async'
 
+bus = require './Bus'
+
 Modulator = require '../'
 Account = require './Account'
 
@@ -9,18 +11,28 @@ module.exports = (table, config, app, routes, name) ->
   class Resource
 
     constructor: (blob) ->
-      @table = @.__proto__.constructor.table
+      @_table = @.__proto__.constructor.table
       for key, value of blob
         @[key] = value
+
+      if @id?
+        bus.on '_modulator_' + name + '_' + @id, (instance) =>
+          for key, value of instance
+            @[key] = value
 
     Save: (done) ->
       exists = @id?
 
-      @table.Save @Serialize(), (err, id) =>
+      @_table.Save @Serialize(), (err, id) =>
         return done err if err?
+
+        bus.emit '_modulator_' + name + '_' + id, @Serialize()
 
         if !exists
           @id = id
+          bus.on '_modulator_' + name + '_' + @id, (instance) =>
+            for key, value of instance
+              @[key] = value
 
         done null, @
 
@@ -30,7 +42,7 @@ module.exports = (table, config, app, routes, name) ->
     # Send to the database
     Serialize: ->
       res = {}
-      for key, value of @ when typeof value isnt 'function' and value? and key isnt 'table'
+      for key, value of @ when typeof value isnt 'function' and value? and key[0] isnt '_'
         content = @_content value
         if content?
           res[key] = content
