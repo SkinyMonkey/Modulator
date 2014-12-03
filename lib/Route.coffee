@@ -32,7 +32,7 @@ class Route
           if method == type
             done = wrapper done
           else
-            method = method.split('-')
+            method = method.split(' ')
             if method.length > 1
               if method[0] == type and method[1] == url
                 done = wrapper done

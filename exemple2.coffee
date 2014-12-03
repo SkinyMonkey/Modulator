@@ -5,6 +5,7 @@ async = require 'async'
 class WeaponRoute extends Modulator.Route.DefaultRoute
 
 class WeaponResource extends Modulator.Resource('weapon', WeaponRoute)
+  # XXX : could be removed by new description system
   @FetchByUserId: (userId, done) ->
     @table.FindWhere '*', {userId: userId}, (err, blob) =>
       return done err if err?
@@ -58,6 +59,7 @@ UnitResource.Init()
 class PlayerRoute extends UnitRoute
 
 class PlayerResource extends UnitResource.Extend('player', PlayerRoute)
+  # XXX : could be removed with description
   @Deserialize: (blob, done) ->
     if !(blob.id?)
       return super blob, done
@@ -71,6 +73,7 @@ PlayerResource.Init()
 class MonsterRoute extends UnitRoute
 
 class MonsterResource extends UnitResource.Extend('monster', MonsterRoute)
+  # XXX : could be removed with description
   @Deserialize: (blob, done) ->
     if !(blob.id?)
       return super blob, done
